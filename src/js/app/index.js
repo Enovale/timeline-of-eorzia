@@ -6,6 +6,8 @@
 
 var UI = require('ui');
 var Vector2 = require('vector2');
+var Nodes = require('nodes');
+var Sights = require('sightseeing');
 
 var main = new UI.Card({
   title: 'Pebble.js',
@@ -16,25 +18,42 @@ var main = new UI.Card({
   bodyColor: '#9a0036' // Hex colors
 });
 
+var nodeData;
+Nodes.fetchData(
+  function(data) {
+    nodeData = data;
+    console.log("Node Data Fetched");
+  },
+  function(error) {
+    console.log("Error!");
+  }
+);
+
 main.show();
 
 main.on('click', 'up', function(e) {
   var menu = new UI.Menu({
     sections: [{
-      items: [{
-        title: 'Pebble.js',
-        icon: 'images/menu_icon.png',
-        subtitle: 'Can do Menus'
-      }, {
-        title: 'Second Item',
-        subtitle: 'Subtitle Text'
-      }, {
-        title: 'Third Item',
-      }, {
-        title: 'Fourth Item',
-      }]
+      title: "Active Items",
+      items: []
     }]
   });
+  //menu._numPreloadItems = 5;
+  var activeItems = 0;
+  for (var i = 0; i < nodeData.length; i++) {
+    item = nodeData[i];
+    
+    console.log(item.name);
+    if (Util.isLogActive(item, null)) {
+      var sectionItem = {
+        title: item.name,
+        subtitle: item.location,
+        //icon: item.image, // Simply doesn't unload images that aren't seen so this destroys RAM
+      };
+      menu.item(0, activeItems, sectionItem);
+      activeItems++;
+    }
+  }
   menu.on('select', function(e) {
     console.log('Selected item #' + e.itemIndex + ' of section #' + e.sectionIndex);
     console.log('The item is titled "' + e.item.title + '"');
